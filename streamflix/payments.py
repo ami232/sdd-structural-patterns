@@ -45,21 +45,40 @@ class PayPalClient:
 
 class StripeAdapter(PaymentProcessor):
     def __init__(self, stripe: StripeAPI):
-      # TODO: store the wrapped StripeAPI instance
-      pass
+        """Wrap a `StripeAPI` instance for use as a `PaymentProcessor`.
+        The adapter converts euros to integer cents and forwards charges to
+        the wrapped SDK.
+        """
+        self._stripe = stripe
 
     def pay(self, amount: float) -> str:
-      # TODO: convert `amount` (EUR) to integer cents, call self._stripe.charge_cents,
-      # and return "paid {amount:.2f} EUR via stripe ({merchant_id})"
-      pass
+        """Charge `amount` (EUR) via Stripe by converting to cents and
+        returning a human-readable receipt string.
+        Raises `ValueError` for non-positive amounts.
+        """
+        if amount <= 0:
+            raise ValueError("amount must be positive")
+        # Convert euros to integer cents reliably
+        cents = int(round(amount * 100))
+        self._stripe.charge_cents(cents)
+        return f"paid {amount:.2f} EUR via stripe ({self._stripe.merchant_id})"
 
 
 class PayPalAdapter(PaymentProcessor):
     def __init__(self, paypal: PayPalClient):
-      # TODO: store the wrapped PayPalClient instance
-      pass
+        """Wrap a `PayPalClient` instance for use as a `PaymentProcessor`.
+        The adapter formats the amount as a 2-decimal string and forwards
+        the call to the wrapped SDK.
+        """
+        self._paypal = paypal
 
     def pay(self, amount: float) -> str:
-      # TODO: call self._paypal.send_payment with amount formatted to 2 decimals and
-      # currency "EUR", and return "paid {amount:.2f} EUR via paypal ({account_email})"
-      pass
+        """Charge `amount` (EUR) via PayPal by formatting to 2 decimals and
+        returning a human-readable receipt string.
+        Raises `ValueError` for non-positive amounts.
+        """
+        if amount <= 0:
+            raise ValueError("amount must be positive")
+        amount_str = f"{amount:.2f}"
+        self._paypal.send_payment(amount_str, "EUR")
+        return f"paid {amount:.2f} EUR via paypal ({self._paypal.account_email})"
