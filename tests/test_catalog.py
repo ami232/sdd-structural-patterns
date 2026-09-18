@@ -19,9 +19,8 @@ def test_proxy_loads_real_video_on_first_play():
 def test_proxy_reuses_real_video_on_later_plays():
     proxy = ProxyVideo("Inception", "/videos/inception.mp4")
 
-    proxy.play()
-    proxy.play()
-    proxy.play()
+    for _ in range(3):
+        assert proxy.play() == "Playing 'Inception' from /videos/inception.mp4"
 
     assert RealVideo.load_count == 1
 
