@@ -39,11 +39,11 @@ class ProxyVideo(Video):
     """
 
     def __init__(self, title: str, video_path: str):
-      # TODO: store title/video_path, and keep a reference to the (not yet
-      # created) RealVideo, e.g. self._real_video = None
-      pass
+      self._real_video = None
+      self.title = title
+      self.video_path = video_path
 
     def play(self) -> str:
-      # TODO: create the RealVideo lazily on first play() and cache it,
-      # then delegate to it on this and every subsequent call.
-      pass
+      if self._real_video == None:
+          self._real_video = RealVideo(self.title, self.video_path)
+      return self._real_video.play()
